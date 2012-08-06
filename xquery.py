@@ -27,12 +27,11 @@ class XQuery(object):
         if left.tag != right.tag:
             return False
 
-        ll = len(left)
-        lr = len(right)
-        if ll != lr:
+        left_len = len(left)
+        if left_len != len(right):
             return False
 
-        if ll == 0:
+        if left_len == 0:
             ret = left.text == right.text
             if not ret and left.text in (None, '') and \
                 right.text in (None, ''):
@@ -67,9 +66,9 @@ class XQuery(object):
         return the elements deleted
         '''
         backup = []
-        for x in self.find(sel):
-            backup.append(x)
-            x.root.getparent().remove(x.root)
+        for i in self.find(sel):
+            backup.append(i)
+            i.root.getparent().remove(i.root)
         return Chain(backup)
 
     def append(self, xquery_node):
@@ -96,7 +95,7 @@ class XQuery(object):
 
 class ChainMetaClass(type):
 
-    def __new__(meta, name, bases, attrs):
+    def __new__(mcs, name, bases, attrs):
         def make_wrapper(api):
             def wrapper(self, *args, **kw):
                 if len(self) == 1:
@@ -104,10 +103,10 @@ class ChainMetaClass(type):
                 return Chain([ getattr(x, api)(*args, **kw) for x in self ])
             return wrapper
 
-        attrs.update([(api,make_wrapper(api)) \
-            for api in ('dumps', 'append', 'text', 'clone', 'clear', 'inner_dumps')])
+        attrs.update([(api, make_wrapper(api)) for api in ('dumps',
+            'append', 'text', 'clone', 'clear', 'inner_dumps')])
 
-        return type.__new__(meta, name, bases, attrs)
+        return type.__new__(mcs, name, bases, attrs)
 
 
 class Chain(list):
